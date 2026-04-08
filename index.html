@@ -29,6 +29,7 @@ body {
     border: none;
     padding: 8px 15px;
     cursor: pointer;
+    margin-left: 5px;
 }
 
 /* Hero */
@@ -52,6 +53,7 @@ body {
 .form-box {
     display: none;
     padding: 20px;
+    background: #f5f5f5;
 }
 
 input {
@@ -67,7 +69,10 @@ input {
 
 <div class="navbar">
     <h2>Precious Academy</h2>
-    <button onclick="showLogin()">Login</button>
+    <div>
+        <button onclick="showLogin()">Login</button>
+        <button onclick="showSignup()">Sign Up</button>
+    </div>
 </div>
 
 <div class="hero">
@@ -97,18 +102,28 @@ input {
 </div>
 
 <script>
-// Firebase config (YOU WILL REPLACE THIS)
+// ✅ YOUR REAL FIREBASE CONFIG
 var firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_DOMAIN",
-    projectId: "YOUR_ID"
+  apiKey: "AIzaSyB1FbKvbX601BztMYjkP1hNh96JA_R8Elg",
+  authDomain: "precious-academy.firebaseapp.com",
+  projectId: "precious-academy",
+  storageBucket: "precious-academy.firebasestorage.app",
+  messagingSenderId: "926568187411",
+  appId: "1:926568187411:web:f2bb92e73475493927e1e6"
 };
 
 firebase.initializeApp(firebaseConfig);
 
-// Show forms
+// Show Login
 function showLogin() {
     document.getElementById("loginBox").style.display = "block";
+    document.getElementById("signupBox").style.display = "none";
+}
+
+// Show Signup
+function showSignup() {
+    document.getElementById("signupBox").style.display = "block";
+    document.getElementById("loginBox").style.display = "none";
 }
 
 // Signup
@@ -118,7 +133,7 @@ function signup() {
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
-        alert("Account created!");
+        alert("Account created successfully!");
     })
     .catch((error) => {
         alert(error.message);
@@ -132,7 +147,7 @@ function login() {
 
     firebase.auth().signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
-        alert("Login successful!");
+        window.location.href = "dashboard.html";
     })
     .catch((error) => {
         alert(error.message);
