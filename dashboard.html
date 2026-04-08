@@ -1,119 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard - Precious Academy</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: #f4f6f9;
-}
-
-/* Header */
-.header {
-    background: #0B3D91;
-    color: white;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header button {
-    background: gold;
-    border: none;
-    padding: 8px 15px;
-    cursor: pointer;
-}
-
-/* Container */
-.container {
-    padding: 15px;
-}
-
-/* Cards */
-.card {
-    background: white;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
-
-/* Grid */
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-@media (max-width: 600px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
 </head>
 
 <body>
 
-<div class="header">
-    <h3>Precious Academy</h3>
-    <div>
-        <span id="userEmail">Loading...</span>
-        <button onclick="logout()">Logout</button>
-    </div>
-</div>
+<h2>Student Dashboard</h2>
 
-<div class="container">
+<p>Email: <span id="email"></span></p>
+<p>Name: <span id="name"></span></p>
+<p>Class: <span id="className"></span></p>
 
-    <!-- Student Info -->
-    <div class="card">
-        <h3>Student Info</h3>
-        <p><b>Name:</b> <span id="studentName">Loading...</span></p>
-        <p><b>Class:</b> <span id="studentClass">Loading...</span></p>
-        <p><b>Admission No:</b> <span id="studentAdmission">Loading...</span></p>
-    </div>
+<p>Math: <span id="math"></span></p>
+<p>English: <span id="english"></span></p>
+<p>Science: <span id="science"></span></p>
 
-    <!-- Grid Sections -->
-    <div class="grid">
+<p>Fees: <span id="fees"></span></p>
+<p>Status: <span id="status"></span></p>
 
-        <!-- Academic -->
-        <div class="card">
-            <h3>Subjects & Grades</h3>
-            <p>Math: <span id="math"></span></p>
-            <p>English: <span id="english"></span></p>
-            <p>Science: <span id="science"></span></p>
-        </div>
-
-        <!-- Fees -->
-        <div class="card">
-            <h3>Fees</h3>
-            <p><b>Balance:</b> KES <span id="fees"></span></p>
-            <p><b>Status:</b> <span id="status"></span></p>
-        </div>
-
-    </div>
-
-    <!-- Announcements -->
-    <div class="card">
-        <h3>Announcements</h3>
-        <p>Midterm exams start next week.</p>
-        <p>Parents meeting on Friday.</p>
-    </div>
-
-</div>
+<h3>Announcements</h3>
+<div id="announcements"></div>
 
 <script>
-
-// Firebase config
 var firebaseConfig = {
   apiKey: "AIzaSyB1FbKvbX601BztMYjkP1hNh96JA_R8Elg",
   authDomain: "precious-academy.firebaseapp.com",
@@ -125,62 +39,40 @@ var firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-// Firestore
 var db = firebase.firestore();
 
-// AUTH + LOAD DATA
-firebase.auth().onAuthStateChanged(function(user) {
-
-    if (!user) {
-        window.location.href = "index.html";
+firebase.auth().onAuthStateChanged(user=>{
+    if(!user){
+        window.location.href="index.html";
         return;
     }
 
-    if (!user.emailVerified) {
-        alert("Please verify your email first.");
-        firebase.auth().signOut();
-        window.location.href = "index.html";
-        return;
-    }
+    email.innerText = user.email;
 
-    document.getElementById("userEmail").innerText = user.email;
+    db.collection("students").doc(user.uid).get().then(doc=>{
+        if(doc.exists){
+            let d = doc.data();
 
-    // Load student data from Firestore
-    db.collection("students").doc(user.uid).get()
-    .then((doc) => {
-
-        if (doc.exists) {
-            let data = doc.data();
-
-            document.getElementById("studentName").innerText = data.name || "";
-            document.getElementById("studentClass").innerText = data.class || "";
-            document.getElementById("studentAdmission").innerText = data.admission || "";
-
-            document.getElementById("math").innerText = data.math || "";
-            document.getElementById("english").innerText = data.english || "";
-            document.getElementById("science").innerText = data.science || "";
-
-            document.getElementById("fees").innerText = data.fees || "0";
-            document.getElementById("status").innerText = data.status || "Pending";
-
-        } else {
-            console.log("No data found for this user.");
+            name.innerText = d.name;
+            className.innerText = d.className;
+            math.innerText = d.math;
+            english.innerText = d.english;
+            science.innerText = d.science;
+            fees.innerText = d.fees;
+            status.innerText = d.status;
         }
-
-    })
-    .catch((error) => {
-        console.log(error.message);
     });
 
+    loadAnnouncements();
 });
 
-// Logout
-function logout() {
-    firebase.auth().signOut().then(() => {
-        window.location.href = "index.html";
+function loadAnnouncements(){
+    db.collection("announcements").get().then(snap=>{
+        snap.forEach(doc=>{
+            announcements.innerHTML += "<p>"+doc.data().message+"</p>";
+        });
     });
 }
-
 </script>
 
 </body>
