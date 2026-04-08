@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard - Precious Academy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f4f6f9;
+}
+
+/* Header */
+.header {
+    background: #0B3D91;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header button {
+    background: gold;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+/* Container */
+.container {
+    padding: 15px;
+}
+
+/* Cards */
+.card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* Grid */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h3>Precious Academy</h3>
+    <div>
+        <span id="userEmail"></span>
+        <button onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Student Info -->
+    <div class="card">
+        <h3>Student Info</h3>
+        <p><b>Name:</b> John Doe</p>
+        <p><b>Class:</b> Grade 6</p>
+        <p><b>Admission No:</b> PA1234</p>
+    </div>
+
+    <!-- Grid Sections -->
+    <div class="grid">
+
+        <!-- Academic -->
+        <div class="card">
+            <h3>Subjects & Grades</h3>
+            <p>Math: A</p>
+            <p>English: B+</p>
+            <p>Science: A-</p>
+        </div>
+
+        <!-- Fees -->
+        <div class="card">
+            <h3>Fees</h3>
+            <p><b>Balance:</b> KES 10,000</p>
+            <p><b>Status:</b> Pending</p>
+        </div>
+
+    </div>
+
+    <!-- Announcements -->
+    <div class="card">
+        <h3>Announcements</h3>
+        <p>Midterm exams start next week.</p>
+        <p>Parents meeting on Friday.</p>
+    </div>
+
+</div>
+
+<script>
+// Firebase config (same as index.html)
+var firebaseConfig = {
+  apiKey: "AIzaSyB1FbKvbX601BztMYjkP1hNh96JA_R8Elg",
+  authDomain: "precious-academy.firebaseapp.com",
+  projectId: "precious-academy",
+  storageBucket: "precious-academy.firebasestorage.app",
+  messagingSenderId: "926568187411",
+  appId: "1:926568187411:web:f2bb92e73475493927e1e6"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+// Get current user
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        document.getElementById("userEmail").innerText = user.email;
+    } else {
+        window.location.href = "index.html";
+    }
+});
+
+// Logout function
+function logout() {
+    firebase.auth().signOut().then(() => {
+        window.location.href = "index.html";
+    });
+}
+</script>
+
+</body>
+  </html>
