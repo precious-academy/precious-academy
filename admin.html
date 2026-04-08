@@ -1,124 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>School Pro Admin - Precious Academy</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<style>
-body {
-    font-family: Arial;
-    margin: 0;
-    background: #f4f6f9;
-}
-
-.header {
-    background: #0B3D91;
-    color: white;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.container {
-    padding: 15px;
-}
-
-.card {
-    background: white;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-@media(max-width:600px){
-    .grid { grid-template-columns:1fr; }
-}
-
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 6px 0;
-}
-
-button {
-    padding: 10px;
-    background: gold;
-    border: none;
-    cursor: pointer;
-}
-
-.student {
-    border-bottom: 1px solid #ddd;
-    padding: 10px 0;
-}
-</style>
 </head>
 
 <body>
 
-<div class="header">
-    <h3>School Pro Admin</h3>
-    <button onclick="logout()">Logout</button>
-</div>
+<h2>Admin Panel</h2>
 
-<div class="container">
+<input id="uid" placeholder="Student UID">
+<input id="name" placeholder="Name">
+<input id="className" placeholder="Class">
+<input id="admission" placeholder="Admission">
 
-    <!-- STATS -->
-    <div class="card">
-        <h3>Dashboard Overview</h3>
-        <div class="grid">
-            <div>Total Students: <b id="totalStudents">0</b></div>
-            <div>Total Fees: <b id="totalFees">0</b></div>
-        </div>
-    </div>
+<input id="math" placeholder="Math">
+<input id="english" placeholder="English">
+<input id="science" placeholder="Science">
 
-    <!-- ANNOUNCEMENTS -->
-    <div class="card">
-        <h3>Send Announcement</h3>
-        <textarea id="announcement" placeholder="Write announcement..."></textarea>
-        <button onclick="sendAnnouncement()">Send</button>
-    </div>
+<input id="fees" placeholder="Fees">
+<input id="status" placeholder="Status">
 
-    <!-- ADD / UPDATE STUDENT -->
-    <div class="card">
-        <h3>Add / Update Student</h3>
+<button onclick="save()">Save</button>
 
-        <input type="text" id="uid" placeholder="User UID">
-        <input type="text" id="name" placeholder="Student Name">
-        <input type="text" id="class" placeholder="Class">
-        <input type="text" id="admission" placeholder="Admission No">
-
-        <input type="text" id="math" placeholder="Math">
-        <input type="text" id="english" placeholder="English">
-        <input type="text" id="science" placeholder="Science">
-
-        <input type="number" id="fees" placeholder="Fees">
-        <input type="text" id="status" placeholder="Status">
-
-        <button onclick="saveStudent()">Save</button>
-    </div>
-
-    <!-- STUDENTS -->
-    <div class="card">
-        <h3>Students</h3>
-        <div id="studentsList"></div>
-    </div>
-
-</div>
+<h3>Students</h3>
+<div id="list"></div>
 
 <script>
-
-// FIREBASE
 var firebaseConfig = {
   apiKey: "AIzaSyB1FbKvbX601BztMYjkP1hNh96JA_R8Elg",
   authDomain: "precious-academy.firebaseapp.com",
@@ -132,146 +44,68 @@ firebase.initializeApp(firebaseConfig);
 
 var db = firebase.firestore();
 
-// ADMIN EMAIL
-const adminEmails = ["lkodomuk@kabarak.ac.ke"];
+const adminEmail = "lkodomuk@kabarak.ac.ke";
 
-// AUTH
-firebase.auth().onAuthStateChanged(function(user){
-
-    if(!user){
-        window.location.href="index.html";
-        return;
-    }
-
-    if(!adminEmails.includes(user.email)){
+firebase.auth().onAuthStateChanged(user=>{
+    if(!user || user.email !== adminEmail){
         alert("Access denied");
         window.location.href="index.html";
-        return;
     }
-
-    loadStudents();
-    loadStats();
-
+    load();
 });
 
-// SAVE STUDENT
-function saveStudent(){
-
-    let uid = document.getElementById("uid").value;
-
-    db.collection("students").doc(uid).set({
+function save(){
+    db.collection("students").doc(uid.value).set({
         name: name.value,
-        class: class.value,
+        className: className.value,
         admission: admission.value,
         math: math.value,
         english: english.value,
         science: science.value,
-        fees: Number(fees.value),
+        fees: fees.value,
         status: status.value
     });
 
     alert("Saved");
-    loadStudents();
-    loadStats();
+    load();
 }
 
-// LOAD STUDENTS
-function loadStudents(){
-
-    let list = document.getElementById("studentsList");
+function load(){
     list.innerHTML = "";
 
-    db.collection("students").get().then(snapshot=>{
-
-        snapshot.forEach(doc=>{
-
+    db.collection("students").get().then(snap=>{
+        snap.forEach(doc=>{
             let d = doc.data();
 
             list.innerHTML += `
-                <div class="student">
-                    <b>${d.name}</b><br>
-                    Class: ${d.class}<br>
-                    Fees: ${d.fees}<br>
-
-                    <button onclick="edit('${doc.id}')">Edit</button>
-                    <button onclick="del('${doc.id}')">Delete</button>
-                </div>
-            `;
+            <div>
+                ${d.name} - ${d.className}
+                <button onclick="edit('${doc.id}')">Edit</button>
+                <button onclick="del('${doc.id}')">Delete</button>
+            </div>`;
         });
-
     });
 }
 
-// DELETE
-function del(id){
-    db.collection("students").doc(id).delete().then(()=>{
-        loadStudents();
-        loadStats();
-    });
-}
-
-// EDIT
 function edit(id){
-
     db.collection("students").doc(id).get().then(doc=>{
-
         let d = doc.data();
 
         uid.value = id;
         name.value = d.name;
-        class.value = d.class;
+        className.value = d.className;
         admission.value = d.admission;
         math.value = d.math;
         english.value = d.english;
         science.value = d.science;
         fees.value = d.fees;
         status.value = d.status;
-
-    });
-
-}
-
-// STATS
-function loadStats(){
-
-    db.collection("students").get().then(snapshot=>{
-
-        let count = 0;
-        let totalFees = 0;
-
-        snapshot.forEach(doc=>{
-            count++;
-            totalFees += Number(doc.data().fees || 0);
-        });
-
-        totalStudents.innerText = count;
-        totalFees.innerText = totalFees;
-
-    });
-
-}
-
-// ANNOUNCEMENT
-function sendAnnouncement(){
-
-    let msg = announcement.value;
-
-    db.collection("announcements").add({
-        message: msg,
-        date: new Date()
-    });
-
-    alert("Announcement sent to students");
-    announcement.value = "";
-}
-
-// LOGOUT
-function logout(){
-    firebase.auth().signOut().then(()=>{
-        window.location.href="index.html";
     });
 }
 
+function del(id){
+    db.collection("students").doc(id).delete().then(load);
+}
 </script>
 
 </body>
